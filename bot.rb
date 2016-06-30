@@ -17,7 +17,10 @@ bot = Cinch::Bot.new do
       lookahead: Period.new("4 weeks", 60*60*24*28),
       mark_highschool: true 
     }
-    c.plugins.options[QuitPlugin] = { authorized: authorized }
+    c.plugins.options[QuitPlugin] = { 
+      authorized: authorized,
+      message: 'Leaving...'
+    }
     c.plugins.options[VersionPlugin] = { version: 'CTF-Bot v0.1' }
   end
 end

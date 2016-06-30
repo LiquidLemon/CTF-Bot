@@ -6,7 +6,7 @@ class QuitPlugin
   match 'quit'
   def execute(m)
     if config[:authorized].include?(m.user.name)
-      bot.quit('Quitting...')
+      bot.quit(config[:message])
     end
   end
 end
