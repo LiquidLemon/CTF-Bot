@@ -13,7 +13,7 @@ class CTFPlugin
   
   def on_connect(*)
     debug "Running :on_connect"
-    @fetcher = CTF::Fetcher.new(config[:lookahead].seconds)
+    @fetcher = CTF::Fetcher.new(config[:lookahead].to_time)
     @announced_ctfs = []
   end
   
@@ -24,13 +24,13 @@ class CTFPlugin
   def list_upcoming(channel)
     ctfs = @fetcher.ctfs    
     unless ctfs.empty?
-      channel.send("Upcoming CTF's in the next #{config[:lookahead].description}:")
+      channel.send("Upcoming CTF's in the next #{config[:lookahead]}:")
       ctfs.each do |ctf|
         channel.send(ctf.format(mark_hs: config[:mark_highschool]))
         @announced_ctfs.push(ctf)
       end
     else
-      channel.send("There are no upcoming CTF's in the next #{config[:lookahead].description}")
+      channel.send("There are no upcoming CTF's in the next #{config[:lookahead]}")
     end
   end
 

@@ -2,7 +2,7 @@ require 'cinch'
 require_relative 'plugins/ctf'
 require_relative 'plugins/quit'
 require_relative 'plugins/version'
-require_relative 'plugins/util/period'
+require_relative 'util/period'
 
 authorized = ['LiquidLemon']
 
@@ -14,7 +14,7 @@ bot = Cinch::Bot.new do
     c.user = 'CTF-Bot'
     c.plugins.plugins = [CTFPlugin, QuitPlugin, VersionPlugin]
     c.plugins.options[CTFPlugin] = { 
-      lookahead: Period.new("4 weeks", 60*60*24*28),
+      lookahead: Period.new(weeks: 4),
       mark_highschool: true 
     }
     c.plugins.options[QuitPlugin] = { 
