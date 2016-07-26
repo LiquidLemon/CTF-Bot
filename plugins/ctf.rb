@@ -7,31 +7,33 @@ class CTFPlugin
   listen_to :connect, :method => :on_connect
   match 'upcoming', :method => :on_upcoming
   match 'update', :method => :update
-  
+
   # Update every hour
   timer 60*60, :method => :update
-  
+
   def on_connect(*)
     debug "Running :on_connect"
-    @fetcher = CTF::Fetcher.new(config[:lookahead].to_time)
+    @fetcher = CTF::Fetcher.new
     @announced_ctfs = []
   end
-  
+
   def on_upcoming(msg)
     list_upcoming(msg.channel)
   end
 
   def list_upcoming(channel)
-    ctfs = @fetcher.ctfs    
+    msg = ""
+    ctfs = @fetcher.upcoming_ctfs(config[:lookahead].to_time)
     unless ctfs.empty?
-      channel.send("Upcoming CTF's in the next #{config[:lookahead]}:")
+      msg << "Upcoming CTF's in the next #{config[:lookahead]}:\n"
       ctfs.each do |ctf|
-        channel.send(ctf.format(mark_hs: config[:mark_highschool]))
+        msg << CTF.format(ctf, mark_hs: config[:mark_highschool]) + "\n"
         @announced_ctfs.push(ctf)
       end
     else
-      channel.send("There are no upcoming CTF's in the next #{config[:lookahead]}")
+      msg << "There are no upcoming CTF's in the next #{config[:lookahead]}\n"
     end
+    channel.send(msg)
   end
 
   def update
