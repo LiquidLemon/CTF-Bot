@@ -23,7 +23,7 @@ class CTFPlugin
 
   def list_upcoming(channel)
     msg = ""
-    ctfs = @fetcher.upcoming_ctfs(config[:lookahead].to_time)
+    ctfs = @fetcher.upcoming_ctfs(config[:lookahead].to_seconds)
     unless ctfs.empty?
       msg << "Upcoming CTF's in the next #{config[:lookahead]}:\n"
       ctfs.each do |ctf|
