@@ -1,5 +1,6 @@
 require 'cinch'
 require_relative 'ctf/fetcher'
+require 'pry'
 
 class CTFPlugin
   include Cinch::Plugin
@@ -7,14 +8,17 @@ class CTFPlugin
   listen_to :connect, :method => :on_connect
   match 'ctfs', :method => :on_ctfs
   match 'update', :method => :update
+  match 'next', :method => :on_next
 
   # Update every hour
   timer 60*60, :method => :update
 
   def on_connect(*)
-    debug "Running :on_connect"
     @fetcher = CTF::Fetcher.new
     @fetcher.offset = config[:lookahead].to_seconds
+    @scheduled_announcements = {}
+
+    self.update
   end
 
   def on_ctfs(msg)
@@ -45,7 +49,26 @@ class CTFPlugin
     channel.send(msg)
   end
 
-  def update
+  def update(*)
     @fetcher.update
+    @fetcher.upcoming_ctfs.each do |ctf|
+      unless @scheduled_announcements.has_key?(ctf['id'])
+        config[:announce_periods].each do |period|
+          timeout = (ctf['start'].to_time - Time.now - period.to_i).to_i
+          unless timeout < 0
+            Timer(timeout, shots: 1) do
+              announce_ctf(ctf, period.to_s)
+            end
+          end
+        end
+      end
+    end
+  end
+
+  def announce_ctf(ctf, time_string)
+    msg = "[!] #{time_string} left until #{ctf['title']} - #{ctf['url']}"
+    @bot.channels.each do |chan|
+      chan.send(msg)
+    end
   end
 end

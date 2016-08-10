@@ -15,9 +15,15 @@ bot = Cinch::Bot.new do
     c.plugins.plugins = [CTFPlugin, QuitPlugin, VersionPlugin]
     c.plugins.options[CTFPlugin] = { 
       lookahead: Period.new(weeks: 4),
-      mark_highschool: true 
+      mark_highschool: true,
+      announce_periods: [
+          Period.new(weeks: 2),
+          Period.new(weeks: 1),
+          Period.new(days: 1),
+          Period.new(hours: 1)
+      ]
     }
-    c.plugins.options[QuitPlugin] = { 
+    c.plugins.options[QuitPlugin] = {
       authorized: authorized,
       message: 'Leaving...'
     }
