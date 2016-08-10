@@ -36,5 +36,12 @@ module CTF
         ctf['start'].to_time < max_time
       end
     end
+
+    def current_ctfs
+      now = Time.now
+      @ctfs.select do |ctf|
+        ctf['start'].to_time < now && ctf['finish'] > now
+      end
+    end
   end
 end
