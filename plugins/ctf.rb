@@ -1,5 +1,6 @@
 require 'cinch'
 require_relative 'ctf/fetcher'
+require_relative '../util/period'
 require 'pry'
 
 class CTFPlugin
@@ -23,6 +24,10 @@ class CTFPlugin
 
   def on_ctfs(msg)
     list_ctfs(msg.channel)
+  end
+
+  def on_next(msg)
+    announce_next(msg.channel)
   end
 
   def list_ctfs(channel)
@@ -52,10 +57,13 @@ class CTFPlugin
   def update(*)
     @fetcher.update
     @fetcher.upcoming_ctfs.each do |ctf|
-      unless @scheduled_announcements.has_key?(ctf['id'])
+      unless @scheduled_announcements.has_key?(ctf)
+        @scheduled_announcements[ctf] = []
         config[:announce_periods].each do |period|
-          timeout = (ctf['start'].to_time - Time.now - period.to_i).to_i
+          announcement_time = ctf['start'].to_time - period.to_i
+          timeout = announcement_time - Time.now
           unless timeout < 0
+            @scheduled_announcements[ctf].push(announcement_time)
             Timer(timeout, shots: 1) do
               announce_ctf(ctf, period.to_s)
             end
@@ -65,10 +73,21 @@ class CTFPlugin
     end
   end
 
-  def announce_ctf(ctf, time_string)
-    msg = "[!] #{time_string} left until #{ctf['title']} - #{ctf['url']}"
-    @bot.channels.each do |chan|
-      chan.send(msg)
+  def announce_ctf(ctf, time_string, channel = nil)
+    msg = "[!] #{time_string} left until " << CTF.format(ctf, add_dates: false)
+    if channel.nil?
+      @bot.channels.each do |chan|
+        chan.send(msg)
+      end
+    else
+      channel.send(msg)
     end
+  end
+
+  def announce_next(channel)
+    ctf = @scheduled_announcements.min_by { |key, arr| arr.min }.first
+    time_left = ctf['start'].to_time - Time.now
+    time_string = Period.from_seconds(time_left.to_i).to_s(:minutes)
+    announce_ctf(ctf, time_string, channel)
   end
 end

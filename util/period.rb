@@ -30,9 +30,11 @@ class Period
   end
   alias_method :to_i, :to_seconds
 
-  def to_s(accuracy = :s)
+  def to_s(accuracy = :seconds)
     descriptions = @units.reduce([]) do |acc, (desc, val)|
-      unless val == 0
+      if val == 0 || UNIT_MULTIPLIERS.keys.find_index(accuracy) < UNIT_MULTIPLIERS.keys.find_index(desc)
+        acc
+      else
         str = desc.to_s
         str = str[0...-1] if val == 1
         acc << "#{val} #{str}"
