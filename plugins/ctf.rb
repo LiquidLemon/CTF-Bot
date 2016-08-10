@@ -14,6 +14,7 @@ class CTFPlugin
   def on_connect(*)
     debug "Running :on_connect"
     @fetcher = CTF::Fetcher.new
+    @fetcher.offset = config[:lookahead].to_seconds
   end
 
   def on_ctfs(msg)
@@ -30,7 +31,7 @@ class CTFPlugin
       end
     end
 
-    upcoming_ctfs = @fetcher.upcoming_ctfs(config[:lookahead].to_seconds)
+    upcoming_ctfs = @fetcher.upcoming_ctfs
     unless upcoming_ctfs.empty?
       msg << "Upcoming CTF's in the next #{config[:lookahead]}:\n"
       upcoming_ctfs.each do |ctf|

@@ -30,8 +30,8 @@ module CTF
       end
     end
 
-    def upcoming_ctfs(offset)
-      max_time = Time.now + offset
+    def upcoming_ctfs
+      max_time = Time.now + @offset
       @ctfs.select do |ctf|
         ctf['start'].to_time < max_time
       end
