@@ -5,7 +5,7 @@ class CTFPlugin
   include Cinch::Plugin
 
   listen_to :connect, :method => :on_connect
-  match 'upcoming', :method => :on_upcoming
+  match 'ctfs', :method => :on_ctfs
   match 'update', :method => :update
 
   # Update every hour
@@ -16,11 +16,11 @@ class CTFPlugin
     @fetcher = CTF::Fetcher.new
   end
 
-  def on_upcoming(msg)
-    list_upcoming(msg.channel)
+  def on_ctfs(msg)
+    list_ctfs(msg.channel)
   end
 
-  def list_upcoming(channel)
+  def list_ctfs(channel)
     msg = ""
     current_ctfs = @fetcher.current_ctfs
     unless current_ctfs.empty?
