@@ -1,7 +1,6 @@
 require 'cinch'
 require_relative 'ctf/fetcher'
 require_relative '../util/period'
-require 'pry'
 
 class CTFPlugin
   include Cinch::Plugin
