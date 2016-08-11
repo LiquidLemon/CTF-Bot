@@ -17,7 +17,7 @@ class CTFPlugin
   def on_connect(*)
     @fetcher = CTF::Fetcher.new
     @fetcher.offset = config[:lookahead].to_seconds
-    @scheduled_announcements = {}
+    @scheduled_announcements = []
 
     self.update
   end
@@ -57,13 +57,12 @@ class CTFPlugin
   def update(*)
     @fetcher.update
     @fetcher.upcoming_ctfs.each do |ctf|
-      unless @scheduled_announcements.has_key?(ctf)
-        @scheduled_announcements[ctf] = []
+      if @scheduled_announcements.find_index(ctf).nil?
+        @scheduled_announcements.push(ctf)
         config[:announce_periods].each do |period|
           announcement_time = ctf['start'].to_time - period.to_i
           timeout = announcement_time - Time.now
           unless timeout < 0
-            @scheduled_announcements[ctf].push(announcement_time)
             Timer(timeout, shots: 1) do
               announce_ctf(ctf, period.to_s)
             end
@@ -85,7 +84,7 @@ class CTFPlugin
   end
 
   def announce_next(channel)
-    ctf = @scheduled_announcements.min_by { |key, arr| arr.min }.first
+    ctf = @fetcher.upcoming_ctfs.sort_by { |ctf| ctf['start'].to_time }.first
     time_left = ctf['start'].to_time - Time.now
     time_string = Period.from_seconds(time_left.to_i).to_s(:minutes)
     announce_ctf(ctf, time_string, channel)
