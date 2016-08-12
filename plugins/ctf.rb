@@ -67,12 +67,21 @@ class CTFPlugin
             end
           end
         end
+        time_till_start = ctf['start'].to_time - Time.now
+        Timer(time_till_start, shots: 1) do
+          announce_ctf(ctf, nil)
+        end
       end
     end
   end
 
   def announce_ctf(ctf, time_string, target = nil)
-    msg = "[!] #{time_string} left until " << CTF.format(ctf, add_dates: false)
+    if time_string.nil?
+      msg = "[!] #{CTF.format(ctf, add_dates: false)} is live!"
+    else
+      msg = "[!] #{time_string} left until " << CTF.format(ctf, add_dates: false)
+    end
+
     if target.nil?
       @bot.channels.each do |chan|
         chan.send(msg)
