@@ -22,14 +22,14 @@ class CTFPlugin
   end
 
   def on_ctfs(msg)
-    list_ctfs(msg.channel)
+    list_ctfs(msg.channel || msg.user)
   end
 
   def on_next(msg)
-    announce_next(msg.channel)
+    announce_next(msg.channel || msg.user)
   end
 
-  def list_ctfs(channel)
+  def list_ctfs(target)
     msg = ""
     current_ctfs = @fetcher.current_ctfs
     unless current_ctfs.empty?
@@ -50,7 +50,7 @@ class CTFPlugin
     if msg.empty?
       msg << "There are no upcoming CTF's in the next #{config[:lookahead]}\n"
     end
-    channel.send(msg)
+    target.send(msg)
   end
 
   def update(*)
@@ -71,21 +71,21 @@ class CTFPlugin
     end
   end
 
-  def announce_ctf(ctf, time_string, channel = nil)
+  def announce_ctf(ctf, time_string, target = nil)
     msg = "[!] #{time_string} left until " << CTF.format(ctf, add_dates: false)
-    if channel.nil?
+    if target.nil?
       @bot.channels.each do |chan|
         chan.send(msg)
       end
     else
-      channel.send(msg)
+      target.send(msg)
     end
   end
 
-  def announce_next(channel)
+  def announce_next(target)
     ctf = @fetcher.upcoming_ctfs.sort_by { |ctf| ctf['start'].to_time }.first
     time_left = ctf['start'].to_time - Time.now
     time_string = Period.from_seconds(time_left.to_i).to_s(:minutes)
-    announce_ctf(ctf, time_string, channel)
+    announce_ctf(ctf, time_string, target)
   end
 end
