@@ -15,7 +15,8 @@ module CTF
     end
 
     def update
-      start = Time.now.strftime('%s')
+      # TODO find a proper fix for fetching already running events
+      start = (Time.now - 60*60*24*31).strftime('%s')
       limit = 100
       uri = URI("https://ctftime.org/api/v1/events/?limit=#{limit}&start=#{start}")
       response = Net::HTTP.get(uri)
@@ -33,14 +34,14 @@ module CTF
     def upcoming_ctfs
       max_time = Time.now + @offset
       @ctfs.select do |ctf|
-        ctf['start'].to_time < max_time
+        ctf['start'].to_time > Time.now && ctf['start'].to_time < max_time
       end
     end
 
     def current_ctfs
       now = Time.now
       @ctfs.select do |ctf|
-        ctf['start'].to_time < now && ctf['finish'] > now
+        ctf['start'].to_time < now && ctf['finish'].to_time > now
       end
     end
   end
