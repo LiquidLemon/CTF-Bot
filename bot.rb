@@ -6,6 +6,11 @@ require_relative 'plugins/help'
 require_relative 'util/period'
 require_relative 'config'
 
+unless CONFIG[:log_path].nil?
+  $stdout.reopen(CONFIG[:log_path], 'a')
+  $stderr.reopen(CONFIG[:log_path], 'a')
+end
+
 bot = Cinch::Bot.new do
   configure do |c|
     c.server = CONFIG[:server]
@@ -30,4 +35,7 @@ bot = Cinch::Bot.new do
   end
 end
 
+bot.loggers.level = CONFIG[:log_level]
+
+Process.daemon if CONFIG[:daemonize]
 bot.start

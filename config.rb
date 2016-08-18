@@ -2,6 +2,14 @@ require_relative 'util/period'
 
 CONFIG = {
     ## General config
+    # If `daemonize` is set to true, then the bot will run in background, detached from the shell
+    daemonize: true,
+    # If not set then the bot will not produce logs
+    log_path: 'log.txt',
+    # One of: :debug, :log, :info, :warn, :error, :fatal
+    log_level: :warn,
+
+    ## IRC config
     server: 'irc.hackthissite.org',
     channels: ['#ctf'],
     nick: 'CTF-Bot',
