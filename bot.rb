@@ -22,9 +22,11 @@ bot = Cinch::Bot.new do
       lookahead: CONFIG[:lookahead],
       mark_highschool: CONFIG[:mark_highschool],
       announce_periods: CONFIG[:announcement_periods],
-      help: "!ctfs - display info about upcoming events\n" +
-          "!next - display info about the next event\n" +
-          "!update - update the database (this happens automatically every hour)\n"
+      help: "!ctfs - display info about all events\n" +
+            "!current - display info about current events\n" +
+            "!upcoming - display info about upcoming events\n" +
+            "!next - display info about the next event\n" +
+            "!update - update the database (this happens automatically every hour)\n"
     }
     c.plugins.options[QuitPlugin] = {
       authorized: CONFIG[:admins],

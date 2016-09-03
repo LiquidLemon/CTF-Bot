@@ -7,6 +7,8 @@ class CTFPlugin
 
   listen_to :connect, :method => :on_connect
   match 'ctfs', :method => :on_ctfs
+  match 'current', :method => :on_current
+  match 'upcoming', :method => :on_upcoming
   match 'update', :method => :update
   match 'next', :method => :on_next
 
@@ -22,15 +24,23 @@ class CTFPlugin
   end
 
   def on_ctfs(msg)
-    list_ctfs(msg.channel || msg.user)
+    list_all_ctfs(msg.channel || msg.user)
   end
 
   def on_next(msg)
     announce_next(msg.channel || msg.user)
   end
 
-  def list_ctfs(target)
-    msg = ""
+  def on_current(msg)
+    list_current_ctfs(msg.channel || msg.user)
+  end
+
+  def on_upcoming(msg)
+    list_upcoming_ctfs(msg.channel || msg.user)
+  end
+
+  def list_current_ctfs(target, notify_empty=true)
+    msg = ''
     current_ctfs = @fetcher.current_ctfs
     unless current_ctfs.empty?
       msg << "Current CTF's:\n"
@@ -38,7 +48,15 @@ class CTFPlugin
         msg << CTF.format(ctf, mark_hs: config[:mark_highschool]) + "\n"
       end
     end
+    if msg.empty?
+      return unless notify_empty
+      msg << "There are no current CTF's\n"
+    end
+    target.send(msg)
+  end
 
+  def list_upcoming_ctfs(target, notify_empty=true)
+    msg = ''
     upcoming_ctfs = @fetcher.upcoming_ctfs
     unless upcoming_ctfs.empty?
       msg << "Upcoming CTF's in the next #{config[:lookahead]}:\n"
@@ -48,9 +66,15 @@ class CTFPlugin
     end
 
     if msg.empty?
+      return unless notify_empty
       msg << "There are no upcoming CTF's in the next #{config[:lookahead]}\n"
     end
     target.send(msg)
+  end
+
+  def list_all_ctfs(target)
+    list_current_ctfs(target, false)
+    list_upcoming_ctfs(target)
   end
 
   def update(*)
@@ -92,7 +116,7 @@ class CTFPlugin
   end
 
   def announce_next(target)
-    ctf = @fetcher.upcoming_ctfs.sort_by { |ctf| ctf['start'].to_time }.first
+    ctf = @fetcher.upcoming_ctfs.sort_by { |c| c['start'].to_time }.first
     time_left = ctf['start'].to_time - Time.now
     time_string = Period.from_seconds(time_left.to_i).to_s(:minutes)
     announce_ctf(ctf, time_string, target)
