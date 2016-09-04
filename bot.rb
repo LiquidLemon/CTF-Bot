@@ -26,7 +26,9 @@ bot = Cinch::Bot.new do
             "!current - display info about current events\n" +
             "!upcoming - display info about upcoming events\n" +
             "!next - display info about the next event\n" +
-            "!update - update the database (this happens automatically every hour)\n"
+            "!update - update the database (this happens automatically every hour)\n" +
+            "!creds - modify the credentials database\n" +
+            "!load - load the credentials database (if modified manually)\n"
     }
     c.plugins.options[QuitPlugin] = {
       authorized: CONFIG[:admins],
