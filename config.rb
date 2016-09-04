@@ -8,6 +8,8 @@ CONFIG = {
     log_path: 'log.txt',
     # One of: :debug, :log, :info, :warn, :error, :fatal
     log_level: :warn,
+    # File used to store credentials
+    credentials_path: 'credentials.json',
 
     ## IRC config
     server: 'irc.hackthissite.org',

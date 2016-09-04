@@ -13,6 +13,7 @@ class CTFPlugin
   match 'update', :method => :update
   match 'next', :method => :on_next
   match(/creds/, :method => :on_creds)
+  match 'load', :method => :load_credentials
 
   # Update every hour
   timer 60*60, :method => :update
@@ -22,6 +23,7 @@ class CTFPlugin
     @fetcher.offset = config[:lookahead].to_seconds
     @scheduled_announcements = []
     @credentials = {}
+    load_credentials
 
     self.update
   end
@@ -60,6 +62,7 @@ class CTFPlugin
     ctf = ctfs.first
     @credentials[ctf['title']] = args[2..3]
     msg.reply('Credentials added')
+    save_credentials
   end
 
   # TODO: Refactor with #list_upcoming_ctfs
@@ -155,5 +158,13 @@ class CTFPlugin
     time_left = ctf['start'].to_time - Time.now
     time_string = Period.from_seconds(time_left.to_i).to_s(:minutes)
     announce_ctf(ctf, time_string, target)
+  end
+
+  def save_credentials
+    File.write(CONFIG[:credentials_path], JSON.generate(@credentials))
+  end
+
+  def load_credentials
+    @credentials = JSON.parse(File.read(CONFIG[:credentials_path]))
   end
 end
