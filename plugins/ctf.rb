@@ -1,4 +1,5 @@
 require 'cinch'
+require 'json'
 require_relative 'ctf/fetcher'
 require_relative '../util/period'
 
@@ -11,6 +12,7 @@ class CTFPlugin
   match 'upcoming', :method => :on_upcoming
   match 'update', :method => :update
   match 'next', :method => :on_next
+  match(/creds/, :method => :on_creds)
 
   # Update every hour
   timer 60*60, :method => :update
@@ -19,6 +21,7 @@ class CTFPlugin
     @fetcher = CTF::Fetcher.new
     @fetcher.offset = config[:lookahead].to_seconds
     @scheduled_announcements = []
+    @credentials = {}
 
     self.update
   end
@@ -39,13 +42,39 @@ class CTFPlugin
     list_upcoming_ctfs(msg.channel || msg.user)
   end
 
+  def on_creds(msg)
+    args = msg.message.match(/creds (\S+) (\S+)(?: (\S+))?/)
+    if args.nil? || args.size < 3
+      msg.reply('Usage: `!creds ctf user password` or `!creds ctf key`')
+      return
+    end
+    ctfs = @fetcher.current_ctfs.concat(@fetcher.upcoming_ctfs)
+    ctfs = ctfs.select { |c| c['title'].include?(args[1]) }
+    if ctfs.size < 1
+      msg.reply("Couldn't find any CTF's with that name")
+      return
+    elsif ctfs.size > 1
+      msg.reply("Found #{ctfs.size} events with that name: #{ctfs.map{|c| c['title']}.join(', ')}. Please be more specific")
+      return
+    end
+    ctf = ctfs.first
+    @credentials[ctf['title']] = args[2..3]
+    msg.reply('Credentials added')
+  end
+
+  # TODO: Refactor with #list_upcoming_ctfs
   def list_current_ctfs(target, notify_empty=true)
     msg = ''
     current_ctfs = @fetcher.current_ctfs
     unless current_ctfs.empty?
       msg << "Current CTF's:\n"
       current_ctfs.each do |ctf|
-        msg << CTF.format(ctf, mark_hs: config[:mark_highschool]) + "\n"
+        msg << CTF.format(ctf, mark_hs: config[:mark_highschool])
+        if @credentials.has_key?(ctf['title'])
+          creds = @credentials[ctf['title']].reject(&:nil?).map{|x| "'#{x}'"}.join(':')
+          msg << " - #{creds}"
+        end
+        msg << "\n"
       end
     end
     if msg.empty?
@@ -55,13 +84,19 @@ class CTFPlugin
     target.send(msg)
   end
 
+  # TODO: Refactor with #list_current_ctfs
   def list_upcoming_ctfs(target, notify_empty=true)
     msg = ''
     upcoming_ctfs = @fetcher.upcoming_ctfs
     unless upcoming_ctfs.empty?
       msg << "Upcoming CTF's in the next #{config[:lookahead]}:\n"
       upcoming_ctfs.each do |ctf|
-        msg << CTF.format(ctf, mark_hs: config[:mark_highschool]) + "\n"
+        msg << CTF.format(ctf, mark_hs: config[:mark_highschool])
+        if @credentials.has_key?(ctf['title'])
+          creds = @credentials[ctf['title']].reject(&:nil?).map{|x| "'#{x}'"}.join(':')
+          msg << " - #{creds}"
+        end
+        msg << "\n"
       end
     end
 
@@ -103,7 +138,7 @@ class CTFPlugin
     if time_string.nil?
       msg = "[!] #{CTF.format(ctf, add_dates: false)} is live!"
     else
-      msg = "[!] #{time_string} left until " << CTF.format(ctf, add_dates: false)
+      msg = "[!] #{CTF.format(ctf, add_dates: false)} starts in #{time_string}"
     end
 
     if target.nil?
