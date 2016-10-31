@@ -3,16 +3,22 @@ An IRC bot that announces upcoming on-line CTF events built with the [Cinch](htt
 
 It also stores credentials to events' accounts.
 
-## Installation
+## Setup
 Make sure that you have both [Ruby](https://www.ruby-lang.org) and [Bundler](http://bundler.io/) installed. Then follow these steps:
 ```bash
+# Download the code
 git clone https://github.com/LiquidLemon/CTF-Bot.git
 cd CTF-Bot
+# Install the dependencies
 bundle
+# Clone the example config
+cp example-config.rb config.rb
+# Now make changes to the config with your text editor of choice (e.g. Vim)
+vim config.rb
 ```
 
 ## Configuration
-Example configuration is present in `config.rb` along with explanation of all the options.
+Example configuration is present in `example-config.rb` along with explanation of all the options.
 
 ## Running
 Run `ruby bot.rb` in the project's root directory.

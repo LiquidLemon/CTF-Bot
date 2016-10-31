@@ -4,7 +4,13 @@ require_relative 'plugins/quit'
 require_relative 'plugins/version'
 require_relative 'plugins/help'
 require_relative 'util/period'
-require_relative 'config'
+
+begin
+  require_relative 'config'
+rescue LoadError
+  puts "Could not find 'config.rb'. You can find the template in 'example-config.rb'."
+  exit 1
+end
 
 unless CONFIG[:log_path].nil?
   $stdout.reopen(CONFIG[:log_path], 'a')
