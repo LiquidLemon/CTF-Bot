@@ -45,7 +45,10 @@ class CTFPlugin
   end
 
   def on_creds(msg)
-    args = msg.message.match(/creds (\S+) (\S+)(?: (\S+))?/)
+    args = msg.message.match(/creds\s+(\S+)\s+((?:(?<!\\)\\ |\S)+)(?:\s+((?:(?<!\\)\\ |\S)+))?/).to_a
+    args.map! do |arg|
+      arg.gsub(/\\ /, ' ').gsub(/\\\\/, '\\')
+    end
     if args.nil? || args.size < 3
       msg.reply('Usage: `!creds ctf user password` or `!creds ctf key`')
       return
