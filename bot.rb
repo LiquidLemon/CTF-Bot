@@ -47,5 +47,5 @@ end
 
 bot.loggers.level = CONFIG[:log_level]
 
-Process.daemon if CONFIG[:daemonize]
+Process.daemon(true, true) if CONFIG[:daemonize]
 bot.start
