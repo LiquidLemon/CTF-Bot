@@ -45,17 +45,18 @@ class CTFPlugin
   end
 
   def on_creds(msg)
-    args = msg.message.match(/creds\s+(\S+)\s+((?:(?<!\\)\\ |\S)+)(?:\s+((?:(?<!\\)\\ |\S)+))?/).to_a
-    args.map! do |arg|
-      arg.gsub(/\\ /, ' ').gsub(/\\\\/, '\\')
-    end
-    if args.nil? || args.size < 3
+    args = msg.message.split(/(?<!(?<!\\)\\)\s+/)
+    args.shift
+    if args.size < 2 || args.size > 3
       msg.reply('Usage: `!creds ctf user password` or `!creds ctf key`')
       return
     end
+    args.map! do |arg|
+      arg.gsub(/\\ /, ' ').gsub(/\\\\/, '\\')
+    end
     ctfs = @fetcher.current_ctfs.concat(@fetcher.upcoming_ctfs)
-    ctfs = ctfs.select { |c| c['title'].include?(args[1]) }
-    if ctfs.size < 1
+    ctfs = ctfs.select { |c| c['title'].include?(args[0]) }
+    if ctfs.empty?
       msg.reply("Couldn't find any CTF's with that name")
       return
     elsif ctfs.size > 1
@@ -63,7 +64,7 @@ class CTFPlugin
       return
     end
     ctf = ctfs.first
-    @credentials[ctf['title']] = args[2..3]
+    @credentials[ctf['title']] = args[1..2]
     msg.reply('Credentials added')
     save_credentials
   end
