@@ -169,6 +169,10 @@ class CTFPlugin
   end
 
   def load_credentials
-    @credentials = JSON.parse(File.read(CONFIG[:credentials_path]))
+    begin
+      @credentials = JSON.parse(File.read(CONFIG[:credentials_path]))
+    rescue Errno::ENOENT
+      log "Couldn't find the credentials.json file"
+    end
   end
 end
