@@ -48,7 +48,7 @@ class CTFPlugin
     args = msg.message.split(/(?<!(?<!\\)\\)\s+/)
     args.shift
     if args.size < 2 || args.size > 3
-      msg.reply('Usage: `!creds ctf user password` or `!creds ctf key`')
+      msg.reply('Usage: `!creds ctf user password` or `!creds ctf key` ("\ " for space and "\\\\" for backslashes)')
       return
     end
     args.map! do |arg|
