@@ -55,16 +55,16 @@ class CTFPlugin
       arg.gsub(/\\ /, ' ').gsub(/\\\\/, '\\')
     end
     ctfs = @fetcher.current_ctfs.concat(@fetcher.upcoming_ctfs)
-    ctfs = ctfs.select { |c| c['title'].include?(args[0]) }
+    ctfs = ctfs.select { |c| c.title.include?(args[0]) }
     if ctfs.empty?
       msg.reply("Couldn't find any CTF's with that name")
       return
     elsif ctfs.size > 1
-      msg.reply("Found #{ctfs.size} events with that name: #{ctfs.map{|c| c['title']}.join(', ')}. Please be more specific")
+      msg.reply("Found #{ctfs.size} events with that name: #{ctfs.map{|c| c.title }.join(', ')}. Please be more specific")
       return
     end
     ctf = ctfs.first
-    @credentials[ctf['title']] = args[1..2]
+    @credentials[ctf.title] = args[1..2]
     msg.reply('Credentials added')
     save_credentials
   end
@@ -99,8 +99,8 @@ class CTFPlugin
       msg << "Upcoming CTF's in the next #{config[:lookahead]}:\n"
       upcoming_ctfs.each do |ctf|
         msg << CTF.format(ctf, mark_hs: config[:mark_highschool])
-        if @credentials.has_key?(ctf['title'])
-          creds = @credentials[ctf['title']].reject(&:nil?).map{|x| "'#{x}'"}.join(':')
+        if @credentials.has_key?(ctf.title)
+          creds = @credentials[ctf.title].reject(&:nil?).map{|x| "'#{x}'"}.join(':')
           msg << " - #{creds}"
         end
         msg << "\n"
@@ -125,7 +125,7 @@ class CTFPlugin
       if @scheduled_announcements.find_index(ctf).nil?
         @scheduled_announcements.push(ctf)
         config[:announce_periods].each do |period|
-          announcement_time = ctf['start'].to_time - period.to_i
+          announcement_time = ctf.start.to_time - period.to_i
           timeout = announcement_time - Time.now
           unless timeout < 0
             Timer(timeout, shots: 1) do
@@ -133,7 +133,7 @@ class CTFPlugin
             end
           end
         end
-        time_till_start = ctf['start'].to_time - Time.now
+        time_till_start = ctf.start.to_time - Time.now
         Timer(time_till_start, shots: 1) do
           announce_ctf(ctf, nil)
         end
@@ -158,8 +158,8 @@ class CTFPlugin
   end
 
   def announce_next(target)
-    ctf = @fetcher.upcoming_ctfs.sort_by { |c| c['start'].to_time }.first
-    time_left = ctf['start'].to_time - Time.now
+    ctf = @fetcher.upcoming_ctfs.sort_by { |c| c.start.to_time }.first
+    time_left = ctf.start.to_time - Time.now
     time_string = Period.from_seconds(time_left.to_i).to_s(:minutes)
     announce_ctf(ctf, time_string, target)
   end

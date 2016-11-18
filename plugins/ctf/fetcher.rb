@@ -1,5 +1,6 @@
 require 'net/http'
 require 'json'
+require 'ostruct'
 
 require_relative 'ctf'
 
@@ -20,11 +21,11 @@ module CTF
       limit = 100
       uri = URI("https://ctftime.org/api/v1/events/?limit=#{limit}&start=#{start}")
       response = Net::HTTP.get(uri)
-      data = JSON.parse(response)
-      data.select! { |ctf| !ctf["onsite"] }
+      data = JSON.parse(response).map { |ctf| OpenStruct.new(ctf) }
+      data.select! { |ctf| !ctf.onsite }
 
       data.each do |new_ctf|
-        already_stored = @ctfs.any? { |ctf| ctf['ctf_id'] == new_ctf['ctf_id'] }
+        already_stored = @ctfs.any? { |ctf| ctf.ctf_id == new_ctf.ctf_id }
         unless already_stored
           @ctfs.push(new_ctf)
         end
@@ -34,14 +35,14 @@ module CTF
     def upcoming_ctfs
       max_time = Time.now + @offset
       @ctfs.select do |ctf|
-        ctf['start'].to_time > Time.now && ctf['start'].to_time < max_time
+        ctf.start.to_time > Time.now && ctf.start.to_time < max_time
       end
     end
 
     def current_ctfs
       now = Time.now
       @ctfs.select do |ctf|
-        ctf['start'].to_time < now && ctf['finish'].to_time > now
+        ctf.start.to_time < now && ctf.finish.to_time > now
       end
     end
   end

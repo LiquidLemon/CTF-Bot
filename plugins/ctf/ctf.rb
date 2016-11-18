@@ -8,8 +8,8 @@ module CTF
     if add_dates
       time_format = '%-d %b'
       string << '%s - %s: ' % [
-        ctf['start'].to_time.strftime(time_format).rjust(6),
-        ctf['finish'].to_time.strftime(time_format).ljust(6),
+        ctf.start.to_time.strftime(time_format).rjust(6),
+        ctf.finish.to_time.strftime(time_format).ljust(6),
       ]
     end
 
@@ -17,10 +17,10 @@ module CTF
       string << '[HS]'
     end
 
-    string << '[%s] - %s' % [ctf['title'], ctf['url']]
+    string << '[%s] - %s' % [ctf.title, ctf.url]
   end
 
   def self.is_highschool?(ctf)
-    return !(ctf['description'] =~ /high\s?school/i).nil?
+    return !(ctf.description =~ /high\s?school/i).nil?
   end
 end
