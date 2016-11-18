@@ -24,7 +24,7 @@ bot = Cinch::Bot.new do
     c.nick = CONFIG[:nick]
     c.user = 'CTF-Bot'
     c.plugins.plugins = [CTFPlugin, QuitPlugin, VersionPlugin, HelpPlugin]
-    c.plugins.prefix = CONFIG[:prefix] || /^!/
+    c.plugins.prefix = /^#{CONFIG[:prefix] || '!'}/
     c.plugins.options[CTFPlugin] = {
       lookahead: CONFIG[:lookahead],
       mark_highschool: CONFIG[:mark_highschool],

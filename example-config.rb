@@ -17,8 +17,8 @@ CONFIG = {
     nick: 'CTF-Bot',
 
     # Prefix used for the bot's commands
-    # If not defined then it defaults to /^!/
-    prefix: /^!/,
+    # Defaults to '!'
+    prefix: '!',
 
     ## Used for the `!quit` command
     admins: ['LiquidLemon'],
