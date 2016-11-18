@@ -13,22 +13,22 @@ rescue LoadError
 end
 
 unless CONFIG[:log_path].nil?
-  $stdout.reopen(CONFIG[:log_path], 'a')
-  $stderr.reopen(CONFIG[:log_path], 'a')
+  $stdout.reopen(CONFIG.log_path, 'a')
+  $stderr.reopen(CONFIG.log_path, 'a')
 end
 
 bot = Cinch::Bot.new do
   configure do |c|
-    c.server = CONFIG[:server]
-    c.channels = CONFIG[:channels]
-    c.nick = CONFIG[:nick]
+    c.server = CONFIG.server
+    c.channels = CONFIG.channels
+    c.nick = CONFIG.nick
     c.user = 'CTF-Bot'
     c.plugins.plugins = [CTFPlugin, QuitPlugin, VersionPlugin, HelpPlugin]
-    c.plugins.prefix = /^#{CONFIG[:prefix] || '!'}/
+    c.plugins.prefix = /^#{CONFIG.prefix || '!'}/
     c.plugins.options[CTFPlugin] = {
-      lookahead: CONFIG[:lookahead],
-      mark_highschool: CONFIG[:mark_highschool],
-      announce_periods: CONFIG[:announcement_periods],
+      lookahead: CONFIG.lookahead,
+      mark_highschool: CONFIG.mark_highschool,
+      announce_periods: CONFIG.announcement_periods,
       help: "!ctfs - display info about all events\n" +
             "!current - display info about current events\n" +
             "!upcoming - display info about upcoming events\n" +
@@ -38,7 +38,7 @@ bot = Cinch::Bot.new do
             "!load - load the credentials database (if modified manually)\n"
     }
     c.plugins.options[QuitPlugin] = {
-      authorized: CONFIG[:admins],
+      authorized: CONFIG.admins,
       message: 'Leaving...',
       help: '!quit - leave the server (you have to be set as an admin in the config)'
     }
@@ -46,7 +46,7 @@ bot = Cinch::Bot.new do
   end
 end
 
-bot.loggers.level = CONFIG[:log_level]
+bot.loggers.level = CONFIG.log_level
 
-Process.daemon(true, true) if CONFIG[:daemonize]
+Process.daemon(true, true) if CONFIG.daemonize
 bot.start

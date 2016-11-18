@@ -69,49 +69,39 @@ class CTFPlugin
     save_credentials
   end
 
-  # TODO: Refactor with #list_upcoming_ctfs
-  def list_current_ctfs(target, notify_empty=true)
+  def list_ctfs(ctfs, target)
     msg = ''
-    current_ctfs = @fetcher.current_ctfs
-    unless current_ctfs.empty?
-      msg << "Current CTF's:\n"
-      current_ctfs.each do |ctf|
-        msg << CTF.format(ctf, mark_hs: config[:mark_highschool])
-        if @credentials.has_key?(ctf['title'])
-          creds = @credentials[ctf['title']].reject(&:nil?).map{|x| "'#{x}'"}.join(':')
-          msg << " - #{creds}"
-        end
-        msg << "\n"
+    ctfs.each do |ctf|
+      msg << CTF.format(ctf, mark_hs: config[:mark_highschool])
+      if @credentials.has_key?(ctf.title)
+        creds = @credentials[ctf.title].reject(&:nil?).map { |x| "'#{x}'" }.join(':')
+        msg << " - #{creds}"
       end
-    end
-    if msg.empty?
-      return unless notify_empty
-      msg << "There are no current CTF's\n"
+      msg << "\n"
     end
     target.send(msg)
   end
 
-  # TODO: Refactor with #list_current_ctfs
-  def list_upcoming_ctfs(target, notify_empty=true)
-    msg = ''
-    upcoming_ctfs = @fetcher.upcoming_ctfs
-    unless upcoming_ctfs.empty?
-      msg << "Upcoming CTF's in the next #{config[:lookahead]}:\n"
-      upcoming_ctfs.each do |ctf|
-        msg << CTF.format(ctf, mark_hs: config[:mark_highschool])
-        if @credentials.has_key?(ctf.title)
-          creds = @credentials[ctf.title].reject(&:nil?).map{|x| "'#{x}'"}.join(':')
-          msg << " - #{creds}"
-        end
-        msg << "\n"
-      end
-    end
-
-    if msg.empty?
+  def list_current_ctfs(target, notify_empty=true)
+    current_ctfs = @fetcher.current_ctfs
+    if !current_ctfs.empty?
+      target.send("Current CTF's:\n")
+      list_ctfs(current_ctfs, msg)
+    else
       return unless notify_empty
-      msg << "There are no upcoming CTF's in the next #{config[:lookahead]}\n"
+      target.send("There are no current CTF's\n")
     end
-    target.send(msg)
+  end
+
+  def list_upcoming_ctfs(target, notify_empty=true)
+    upcoming_ctfs = @fetcher.upcoming_ctfs
+    if !upcoming_ctfs.empty?
+      target.send("Upcoming CTF's in the next #{config[:lookahead]}:\n")
+      list_ctfs(upcoming_ctfs, target)
+    else
+      return unless notify_empty
+      target.send("There are no upcoming CTF's in the next #{config[:lookahead]}\n")
+    end
   end
 
   def list_all_ctfs(target)
