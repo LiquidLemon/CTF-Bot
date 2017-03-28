@@ -79,28 +79,28 @@ class CTFPlugin
       end
       msg << "\n"
     end
-    target.send(msg)
+    target.notice(msg)
   end
 
   def list_current_ctfs(target, notify_empty=true)
     current_ctfs = @fetcher.current_ctfs
     if !current_ctfs.empty?
-      target.send("Current CTF's:\n")
+      target.notice("Current CTF's:\n")
       list_ctfs(current_ctfs, msg)
     else
       return unless notify_empty
-      target.send("There are no current CTF's\n")
+      target.notice("There are no current CTF's\n")
     end
   end
 
   def list_upcoming_ctfs(target, notify_empty=true)
     upcoming_ctfs = @fetcher.upcoming_ctfs
     if !upcoming_ctfs.empty?
-      target.send("Upcoming CTF's in the next #{config[:lookahead]}:\n")
+      target.notice("Upcoming CTF's in the next #{config[:lookahead]}:\n")
       list_ctfs(upcoming_ctfs, target)
     else
       return unless notify_empty
-      target.send("There are no upcoming CTF's in the next #{config[:lookahead]}\n")
+      target.notice("There are no upcoming CTF's in the next #{config[:lookahead]}\n")
     end
   end
 
@@ -140,10 +140,10 @@ class CTFPlugin
 
     if target.nil?
       @bot.channels.each do |chan|
-        chan.send(msg)
+        chan.notice(msg)
       end
     else
-      target.send(msg)
+      target.notice(msg)
     end
   end
 

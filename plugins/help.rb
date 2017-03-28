@@ -7,9 +7,9 @@ class HelpPlugin
   def execute(m)
     @bot.config.plugins.options.values.each do |plugin|
       unless plugin[:help].nil?
-        m.user.send(plugin[:help])
+        m.user.notice(plugin[:help])
       end
     end
-    m.user.send('!help - display this message')
+    m.user.notice('!help - display this message')
   end
 end
