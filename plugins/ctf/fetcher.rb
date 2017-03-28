@@ -11,7 +11,6 @@ module CTF
     attr_accessor :offset
 
     def initialize
-      @ctfs = []
       self.update
     end
 
@@ -24,11 +23,9 @@ module CTF
       data = JSON.parse(response).map { |ctf| OpenStruct.new(ctf) }
       data.select! { |ctf| !ctf.onsite }
 
+      @ctfs = []
       data.each do |new_ctf|
-        already_stored = @ctfs.any? { |ctf| ctf.ctf_id == new_ctf.ctf_id }
-        unless already_stored
-          @ctfs.push(new_ctf)
-        end
+        @ctfs.push(new_ctf)
       end
     end
 
