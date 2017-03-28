@@ -39,7 +39,7 @@ bot = Cinch::Bot.new do
     c.plugins.prefix = /^#{CONFIG.prefix || '!'}/
     c.plugins.options[CTFPlugin] = {
       lookahead: CONFIG.lookahead,
-
+      event_limit: CONFIG.event_limit,
       mark_highschool: CONFIG.mark_highschool,
       announce_periods: CONFIG.announcement_periods,
       help: help_message
