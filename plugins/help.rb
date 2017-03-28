@@ -1,4 +1,5 @@
 require 'cinch'
+require_relative '../config'
 
 class HelpPlugin
   include Cinch::Plugin
@@ -10,6 +11,5 @@ class HelpPlugin
         m.user.notice(plugin[:help])
       end
     end
-    m.user.notice('!help - display this message')
   end
 end

@@ -21,6 +21,9 @@ CONFIG.nick = 'CTF-Bot'
 # Defaults to '!'
 CONFIG.prefix = '!'
 
+# How many events should be listed in a channel
+CONFIG.event_limit = 3
+
 ## Used for the `!quit` command
 CONFIG.admins = ['LiquidLemon']
 

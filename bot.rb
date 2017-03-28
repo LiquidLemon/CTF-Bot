@@ -17,6 +17,18 @@ unless CONFIG[:log_path].nil?
   $stderr.reopen(CONFIG.log_path, 'a')
 end
 
+help_message = {
+  "ctfs" => "display info about all events\n",
+  "current" => "display info about current events\n",
+  "upcoming" => "display info about upcoming events\n",
+  "next" => "display info about the next event\n",
+  "update" => "update the database (this happens automatically every hour)\n",
+  "creds" => "modify the credentials database\n",
+  "load" => "load the credentials database (if modified manually)\n"
+}
+
+help_message = help_message.map { |k, v| "#{CONFIG.prefix}#{k} - #{v}" }.join
+
 bot = Cinch::Bot.new do
   configure do |c|
     c.server = CONFIG.server
@@ -27,20 +39,14 @@ bot = Cinch::Bot.new do
     c.plugins.prefix = /^#{CONFIG.prefix || '!'}/
     c.plugins.options[CTFPlugin] = {
       lookahead: CONFIG.lookahead,
+
       mark_highschool: CONFIG.mark_highschool,
       announce_periods: CONFIG.announcement_periods,
-      help: "!ctfs - display info about all events\n" +
-            "!current - display info about current events\n" +
-            "!upcoming - display info about upcoming events\n" +
-            "!next - display info about the next event\n" +
-            "!update - update the database (this happens automatically every hour)\n" +
-            "!creds - modify the credentials database\n" +
-            "!load - load the credentials database (if modified manually)\n"
+      help: help_message
     }
     c.plugins.options[QuitPlugin] = {
       authorized: CONFIG.admins,
-      message: 'Leaving...',
-      help: '!quit - leave the server (you have to be set as an admin in the config)'
+      message: 'Leaving...'
     }
     c.plugins.options[VersionPlugin] = { version: 'CTF-Bot v0.1. Get the source at https://github.com/LiquidLemon/CTF-Bot' }
   end
