@@ -14,9 +14,14 @@ class CTFPlugin
   match 'next', :method => :on_next
   match(/creds/, :method => :on_creds)
   match 'load', :method => :load_credentials
+  match 'timers', :method => :list_timers
 
   # Update every hour
   timer 60*60, :method => :update
+
+  def list_timers(msg)
+    msg.reply timers.size
+  end
 
   def on_connect(*)
     @fetcher = CTF::Fetcher.new
