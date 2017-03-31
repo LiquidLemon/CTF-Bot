@@ -87,7 +87,7 @@ class CTFPlugin
       msg << "\n"
     end
     target.notice(msg)
-    if amount != ctfs.size
+    if amount < ctfs.size
       target.notice("and #{ctfs.size - amount} more. To see all request over PM.")
     end
   end
