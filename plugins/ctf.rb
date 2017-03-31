@@ -26,7 +26,6 @@ class CTFPlugin
   def on_connect(*)
     @fetcher = CTF::Fetcher.new
     @fetcher.offset = config[:lookahead].to_seconds
-    @scheduled_announcements = []
     @credentials = {}
     load_credentials
 
@@ -122,18 +121,17 @@ class CTFPlugin
   def update(*)
     @fetcher.update
     @fetcher.upcoming_ctfs.each do |ctf|
-      if @scheduled_announcements.find_index(ctf).nil?
-        @scheduled_announcements.push(ctf)
-        config[:announce_periods].each do |period|
-          announcement_time = ctf.start.to_time - period.to_i
-          timeout = announcement_time - Time.now
-          unless timeout < 0
-            Timer(timeout, shots: 1) do
-              announce_ctf(ctf, period.to_s)
-            end
+      config[:announce_periods].each do |period|
+        announcement_time = ctf.start.to_time - period.to_i
+        timeout = announcement_time - Time.now
+        unless timeout < 0 || timeout > 2 * 60 * 60
+          Timer(timeout, shots: 1) do
+            announce_ctf(ctf, period.to_s)
           end
         end
-        time_till_start = ctf.start.to_time - Time.now
+      end
+      time_till_start = ctf.start.to_time - Time.now
+      if time_till_start < 2 * 60 * 60
         Timer(time_till_start, shots: 1) do
           announce_ctf(ctf, nil)
         end
