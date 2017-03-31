@@ -74,8 +74,9 @@ class CTFPlugin
     save_credentials
   end
 
-  def list_ctfs(ctfs, target, limit = nil)
+  def list_ctfs(ctfs, target)
     msg = ''
+    limit = target.is_a?(Cinch::Channel) ? CONFIG[:event_limit] : nil
     amount = limit.nil? ? ctfs.size : limit
     ctfs.take(amount).each do |ctf|
       msg << CTF.format(ctf, mark_hs: config[:mark_highschool])
@@ -95,7 +96,7 @@ class CTFPlugin
     current_ctfs = @fetcher.current_ctfs
     if !current_ctfs.empty?
       target.notice("Current CTF's:\n")
-      list_ctfs(current_ctfs, msg, target.is_a?(Cinch::Channel) ? CONFIG[:event_limit] : nil)
+      list_ctfs(current_ctfs, target)
     else
       return unless notify_empty
       target.notice("There are no current CTF's\n")
@@ -106,7 +107,7 @@ class CTFPlugin
     upcoming_ctfs = @fetcher.upcoming_ctfs
     if !upcoming_ctfs.empty?
       target.notice("Upcoming CTF's in the next #{config[:lookahead]}:\n")
-      list_ctfs(upcoming_ctfs, target, target.is_a?(Cinch::Channel) ? CONFIG[:event_limit] : nil)
+      list_ctfs(upcoming_ctfs, target)
     else
       return unless notify_empty
       target.notice("There are no upcoming CTF's in the next #{config[:lookahead]}\n")
