@@ -21,7 +21,9 @@ module CTF
       uri = URI("https://ctftime.org/api/v1/events/?limit=#{limit}&start=#{start}")
       response = Net::HTTP.get(uri)
       data = JSON.parse(response).map { |ctf| OpenStruct.new(ctf) }
-      data.select! { |ctf| !ctf.onsite }
+      data.select! do |ctf|
+        !ctf.onsite || ctf.location =~ URI::regexp(['http', 'https'])
+      end
 
       @ctfs = []
       data.each do |new_ctf|
