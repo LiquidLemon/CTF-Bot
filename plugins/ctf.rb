@@ -29,26 +29,32 @@ class CTFPlugin
     @credentials = {}
     load_credentials
 
+    @creds_authorized = []
+
     self.update
   end
 
   def on_ctfs(msg)
-    list_all_ctfs(msg.channel || msg.user)
+    list_all_ctfs(msg)
   end
 
   def on_next(msg)
-    announce_next(msg.channel || msg.user)
+    announce_next(msg)
   end
 
   def on_current(msg)
-    list_current_ctfs(msg.channel || msg.user)
+    list_current_ctfs(msg)
   end
 
   def on_upcoming(msg)
-    list_upcoming_ctfs(msg.channel || msg.user)
+    list_upcoming_ctfs(msg)
   end
 
   def on_creds(msg)
+    unless @creds_authorized.include? msg.user
+      msg.reply('You have to be authorized to do that')
+      return
+    end
     args = msg.message.split(/(?<!(?<!\\)\\)\s+/)
     args.shift
     if args.size < 2 || args.size > 3
@@ -73,13 +79,14 @@ class CTFPlugin
     save_credentials
   end
 
-  def list_ctfs(ctfs, target)
+  def list_ctfs(ctfs, message)
     msg = ''
-    limit = target.is_a?(Cinch::Channel) ? CONFIG[:event_limit] : nil
+    target = message.channel || message.user
+    limit = message.channel ? CONFIG[:event_limit] : nil
     amount = limit.nil? ? ctfs.size : limit
     ctfs.take(amount).each do |ctf|
       msg << CTF.format(ctf, mark_hs: config[:mark_highschool])
-      if @credentials.has_key?(ctf.title)
+      if @credentials.has_key?(ctf.title) && @creds_authorized.include?(message.user.nick)
         creds = @credentials[ctf.title].reject(&:nil?).map { |x| "'#{x}'" }.join(':')
         msg << " - #{creds}"
       end
@@ -91,34 +98,37 @@ class CTFPlugin
     end
   end
 
-  def list_current_ctfs(target, notify_empty=true)
+  def list_current_ctfs(msg, notify_empty=true)
+    target = msg.channel || msg.user
     current_ctfs = @fetcher.current_ctfs
     if !current_ctfs.empty?
       target.notice("Current CTF's:\n")
-      list_ctfs(current_ctfs, target)
+      list_ctfs(current_ctfs, msg)
     else
       return unless notify_empty
       target.notice("There are no current CTF's\n")
     end
   end
 
-  def list_upcoming_ctfs(target, notify_empty=true)
+  def list_upcoming_ctfs(msg, notify_empty=true)
+    target = msg.channel || msg.user
     upcoming_ctfs = @fetcher.upcoming_ctfs
     if !upcoming_ctfs.empty?
       target.notice("Upcoming CTF's in the next #{config[:lookahead]}:\n")
-      list_ctfs(upcoming_ctfs, target)
+      list_ctfs(upcoming_ctfs, msg)
     else
       return unless notify_empty
       target.notice("There are no upcoming CTF's in the next #{config[:lookahead]}\n")
     end
   end
 
-  def list_all_ctfs(target)
-    list_current_ctfs(target, false)
-    list_upcoming_ctfs(target)
+  def list_all_ctfs(msg)
+    list_current_ctfs(msg, false)
+    list_upcoming_ctfs(msg)
   end
 
   def update(*)
+    load_creds_authorized
     @fetcher.update
     @fetcher.upcoming_ctfs.each do |ctf|
       config[:announce_periods].each do |period|
@@ -171,6 +181,14 @@ class CTFPlugin
       @credentials = JSON.parse(File.read(CONFIG[:credentials_path]))
     rescue Errno::ENOENT
       log "Couldn't find the credentials.json file"
+    end
+  end
+
+  def load_creds_authorized
+    begin
+      @creds_authorized = JSON.parse(File.read('authorized.json'))
+    rescue Errno::ENOENT
+      log "Couldn't find the authorized.json file"
     end
   end
 end
