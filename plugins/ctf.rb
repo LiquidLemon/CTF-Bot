@@ -51,7 +51,7 @@ class CTFPlugin
   end
 
   def on_creds(msg)
-    unless @creds_authorized.include? msg.user
+    unless @creds_authorized.include?(msg.user.nick)
       msg.reply('You have to be authorized to do that')
       return
     end
