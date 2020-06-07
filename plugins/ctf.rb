@@ -89,6 +89,8 @@ class CTFPlugin
       if @credentials.has_key?(ctf.title) && @creds_authorized.include?(message.user.nick)
         creds = @credentials[ctf.title].reject(&:nil?).map { |x| "'#{x}'" }.join(':')
         msg << " - #{creds}"
+      elsif @credentials.has_key?(ctf.title)
+        msg << " - participating"
       end
       msg << "\n"
     end
